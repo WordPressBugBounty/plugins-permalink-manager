@@ -185,7 +185,7 @@ class Permalink_Manager_Core_Functions {
 					if ( $duplicates_count > 1 ) {
 						foreach ( $duplicated_uris as $duplicated_uri_id ) {
 							if ( ( $duplicates_priority == 'posts' && ! is_numeric( $duplicated_uri_id ) ) || ( $duplicates_priority !== 'posts' && is_numeric( $duplicated_uri_id ) ) ) {
-								$duplicates_removed++;
+								$duplicates_removed ++;
 
 								if ( $duplicates_removed < $duplicates_count ) {
 									$excluded_ids[] = $duplicated_uri_id;
@@ -299,11 +299,9 @@ class Permalink_Manager_Core_Functions {
 						$query    = $old_query;
 						$excluded = $element_id;
 					}
-				}
-				/**
+				} /**
 				 * 2B. Custom URI assigned to post/page/CPT item
-				 */
-				else if ( isset( $element_id ) && is_numeric( $element_id ) ) {
+				 */ else if ( isset( $element_id ) && is_numeric( $element_id ) ) {
 					// Fix for revisions
 					$is_revision = wp_is_post_revision( $element_id );
 					if ( $is_revision ) {
@@ -403,9 +401,9 @@ class Permalink_Manager_Core_Functions {
 				// Overwrite the detect function and decide whether to exclude the detected item
 				$excluded = apply_filters( 'permalink_manager_excluded_element_id', $excluded, $element_object, $old_query, $pm_query );
 
-				// Make sure the loop does not execute infinitely (limit it to 10 iterations)
+				// Make sure the loop does not execute infinitely (limit it to 20 iterations)
 				$uri_query_iteration ++;
-				if ( $uri_query_iteration === 10 ) {
+				if ( $uri_query_iteration === 25 ) {
 					break;
 				}
 			} // If the detected element was excluded repeat the URI query and try to find a new one
@@ -457,7 +455,7 @@ class Permalink_Manager_Core_Functions {
 				if ( ! empty( $query['attachment'] ) ) {
 					$query = array( 'attachment' => $query['attachment'], 'do_not_redirect' => 1 );
 				} else if ( isset( $query['attachment'] ) ) {
-					$query = $old_query;
+					$query      = $old_query;
 					$element_id = false;
 				}
 			}
@@ -492,10 +490,10 @@ class Permalink_Manager_Core_Functions {
 			if ( ! empty( $element_id ) && empty( $disabled ) && empty( $excluded ) ) {
 				if ( ! empty( $element_object->taxonomy ) ) {
 					$pm_query['id'] = $element_object->term_id;
-					$content_type = "Taxonomy: {$element_object->taxonomy}";
+					$content_type   = "Taxonomy: {$element_object->taxonomy}";
 				} else if ( ! empty( $element_object->post_type ) ) {
 					$pm_query['id'] = $element_object->ID;
-					$content_type = "Post type: {$element_object->post_type}";
+					$content_type   = "Post type: {$element_object->post_type}";
 				}
 
 				// If language mismatch is detected do not set 'do_not_redirect' to allow canonical redirect
@@ -840,8 +838,8 @@ class Permalink_Manager_Core_Functions {
 		 * 4. Check trailing & duplicated slashes (ignore links with query parameters)
 		 */
 		if ( ( ( $trailing_slashes_mode && $trailing_slashes_redirect ) || preg_match( '/\/{2,}/', $old_uri ) ) && empty( $is_front_page ) && empty( $_POST ) && empty( $correct_permalink ) && empty( $query_string ) && ! empty( $old_uri ) && $old_uri !== "/" ) {
-			$trailing_slash        = ( substr( $old_uri, - 1 ) == "/" ) ? true : false;
-			$obsolete_slash        = ( preg_match( '/\/{2,}/', $old_uri ) || preg_match( "/.*\.([a-zA-Z]{3,4})\/$/", $old_uri ) );
+			$trailing_slash = ( substr( $old_uri, - 1 ) == "/" ) ? true : false;
+			$obsolete_slash = ( preg_match( '/\/{2,}/', $old_uri ) || preg_match( "/.*\.([a-zA-Z]{3,4})\/$/", $old_uri ) );
 
 			if ( ( $trailing_slashes_mode == 1 && ! $trailing_slash ) || ( $trailing_slashes_mode == 2 && $trailing_slash ) || $obsolete_slash ) {
 				$new_uri = self::control_trailing_slashes( $old_uri );
@@ -891,7 +889,7 @@ class Permalink_Manager_Core_Functions {
 			// Append query string
 			$correct_permalink = ( ! empty( $query_string ) ) ? sprintf( "%s?%s", strtok( $correct_permalink, "?" ), $query_string ) : $correct_permalink;
 
-			if ( $redirect_type === 'www_redirect' || $rel_old_uri !== $rel_new_uri ) {
+			if ( filter_var( $correct_permalink, FILTER_VALIDATE_URL ) && ( $redirect_type === 'www_redirect' || $rel_old_uri !== $rel_new_uri ) ) {
 				wp_safe_redirect( $correct_permalink, $redirect_mode, PERMALINK_MANAGER_PLUGIN_NAME );
 				exit();
 			}
